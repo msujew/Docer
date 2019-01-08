@@ -2,7 +2,6 @@ import { NextFunction } from "connect";
 import { Request, Response, Router } from "express";
 import { Template } from "../model/Template";
 import * as FileUtil from "../util/FileUtil";
-import * as path from "path";
 
 class TemplateRoutes {
 
@@ -29,33 +28,44 @@ class TemplateRoutes {
     this.router.post("/", (req: Request, res: Response, next: NextFunction) => {
       let template = new Template();
       template.save(req)
-      .then(() => res.send("Successfully saved"))
+      .then(() => res.end())
       .catch(err => next(err));
     });
     this.router.delete("/:name", (req: Request, res: Response, next: NextFunction) => {
       let name = <string>req.fields.name;
-      FileUtil.deleteDir(path.join("resources", "templates", name))
-      .then(() => res.send("Successfully deleted"))
+      FileUtil.deleteDir(FileUtil.resources, FileUtil.templates, name)
+      .then(() => res.end())
       .catch(err => next(err));
     });
   }
 
-  private getDirectories(): Promise<Template[]> {
-    let folder = path.join(process.cwd(), "resources", "templates");
-    return new Promise<Template[]>((resolve, reject) => {
-      FileUtil.readdirStats(folder)
-      .then(stats => {
-        let templates: Template[] = [];
-        for (let stat of stats) {
-          if (stat[1].isDirectory()) {
-            let temp = new Template();
-            temp.name = stat[0];
-            templates.push(temp);
-          }
-        }
-        resolve(templates);
-      }).catch(err => reject(err));
-    });
+  private async getDirectories(): Promise<Template[]> {
+    let folder = FileUtil.combine(process.cwd(), FileUtil.resources, FileUtil.templates);
+    let stats = await FileUtil.readdirStats(folder);
+    let templates: Template[] = [];
+    for (let stat of stats) {
+      if (stat[1].isDirectory()) {
+        let temp = new Template();
+        temp.name = stat[0];
+        temp.icon = await this.getIcon(folder, temp.name);
+        templates.push(temp);
+      }
+    }
+    return templates;
+  }
+
+  private async getIcon(...folder: string[]): Promise<string> {
+    let svgFile = FileUtil.combine(...folder, "icon.svg");
+    try
+    {
+      let buffer = await FileUtil.read(svgFile);
+      let svg = buffer.toString("utf8");
+      return svg;
+    }
+    catch
+    {
+      return undefined;
+    }
   }
 }
 

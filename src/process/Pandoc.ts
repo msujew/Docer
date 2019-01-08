@@ -1,6 +1,5 @@
 import { ConverterData } from "../model/ConverterData";
 import { spawn } from "child_process";
-import * as path from "path";
 import * as FileUtil from "../util/FileUtil";
 
 export class Pandoc {
@@ -11,14 +10,11 @@ export class Pandoc {
 
   private constructor() {
     this.syntaxDefinitions = [];
-    FileUtil.readdir(path.join("resources", "syntax-definition"))
-    .then(files => {
-      for (let file of files) {
-        if (file.endsWith(".xml")) {
-          this.syntaxDefinitions.push(file);
-        }
+    for (let file of FileUtil.readdirSync(FileUtil.resources, FileUtil.syntaxDefinitions)) {
+      if (file.endsWith(".xml")) {
+        this.syntaxDefinitions.push(file);
       }
-    });
+    }
   }
 
   public static getInstance() {
@@ -26,10 +22,10 @@ export class Pandoc {
     return Pandoc.instance;
   }
 
-  public convert(data: ConverterData, folder: string): Promise<Buffer> {
+  public async convert(data: ConverterData, folder: string): Promise<Buffer> {
     return new Promise<Buffer>((resolve, reject) => {
-      let content = path.join(folder, "content");
-      let file = path.join(folder, "result." + data.to);
+      let content = FileUtil.combine(folder, "content");
+      let file = FileUtil.combine(folder, "result." + data.to);
       let args = [ "-s", "-f", data.from, "--resource-path", folder, "--listings" ];
       this.setTemplate(data, args);
 
@@ -37,7 +33,7 @@ export class Pandoc {
       else args.push("-t", data.to);
 
       for (let syntaxDef of this.syntaxDefinitions) {
-        args.push("--syntax-definition", path.join("resources", "syntax-definition", syntaxDef));
+        args.push("--syntax-definition", FileUtil.combine(FileUtil.resources, FileUtil.syntaxDefinitions, syntaxDef));
       }
 
       args.push("-o", file);
@@ -63,7 +59,7 @@ export class Pandoc {
     if (data.template !== undefined && 
         data.template != null &&
         data.template.length > 0) {
-      args.push("--template", "resources/templates/" + data.template + "/template");
+      args.push("--template", FileUtil.combine("resources", "templates", data.template, "/template"));
     }
   }
 }

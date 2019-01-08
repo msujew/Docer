@@ -9,6 +9,13 @@ import SyntaxDefinitionRoutes from "./routes/SyntaxDefinitionRoutes";
 import { NextFunction } from "connect";
 import * as FileUtil from "./util/FileUtil";
 
+declare global {
+  interface Error {
+    /** Appended http status */
+    status?: number;
+  }
+}
+
 class App {
 
   public app: express.Application;
@@ -16,9 +23,6 @@ class App {
   constructor() {
     this.app = express();
     this.config();
-    this.app.use("/convert", ConverterRoutes);
-    this.app.use("/templates", TemplateRoutes);
-    this.app.use("/syntax-definitions", SyntaxDefinitionRoutes);
   }
 
   private config() {
@@ -27,16 +31,31 @@ class App {
     //this.app.use(bodyParser.json({ limit: "100mb" }));
     //support application/x-www-form-urlencoded post data
     //this.app.use(bodyParser.urlencoded({ extended: false, limit: "100mb" }));
-    FileUtil.deleteDirSync("resources/tmp");
-    FileUtil.deleteDirSync("resources/uploads");
-    setTimeout(() => FileUtil.mkdir("resources/uploads"), 100);
-    FileUtil.mkdir("resources/templates");
-    FileUtil.mkdir("resources/syntax-definition");
-    this.app.use(formidable({ multiples: true, uploadDir: process.cwd() + "/resources/uploads" }));
+    FileUtil.deleteDirSync(FileUtil.resources, FileUtil.temporary);
+    FileUtil.deleteDirSync(FileUtil.resources, FileUtil.uploads);
+    //setTimeout(() => FileUtil.mkdirSync(FileUtil.resources, FileUtil.uploads), 100);
+    FileUtil.mkdirSync(FileUtil.resources, FileUtil.templates);
+    FileUtil.mkdirSync(FileUtil.resources, FileUtil.syntaxDefinitions);
+    FileUtil.mkdirSync(FileUtil.resources, FileUtil.uploads);
+    this.app.use(formidable(
+      { 
+        multiples: true, 
+        uploadDir: FileUtil.combine(process.cwd(), FileUtil.resources, FileUtil.uploads) 
+      })
+    );
+    this.app.use("/convert", ConverterRoutes);
+    this.app.use("/templates", TemplateRoutes);
+    this.app.use("/syntax-definitions", SyntaxDefinitionRoutes);
+    this.app.use((_req, _res, next) => {
+      let err = new Error('Not Found');
+      err.status = 404;
+      next(err);
+    });
     this.app.use((err: Error, 
                   _req: express.Request, 
                   res: express.Response, 
                   _next: NextFunction) => {
+      res.status(err.status || 500);
       res.json({ error: { message: err.message }});
     });
   }

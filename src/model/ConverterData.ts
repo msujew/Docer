@@ -1,5 +1,4 @@
 import { Request } from "express";
-import * as path from "path";
 import * as FileUtil from "../util/FileUtil";
 
 export class ConverterData {
@@ -41,33 +40,22 @@ export class ConverterData {
    * Gets or sets the target format
    */
   to: string;
-  //content: string;
   files: string[] = [];
   /**
    * Gets or sets the template for converting
    */
   template: string;
 
-  public save(req: Request, folder: string): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      this.from = <string>req.fields.from || "markdown";
-      this.to = <string>req.fields.to || "markdown";
-      //this.content = <string>req.fields.content || "";
-      this.template = <string>req.fields.template || null;
-      this.files = [];
-      FileUtil.mkdir(folder);
-      Promise.all(Object.keys(req.files).map(fileName => {
-        return new Promise<void>((resolve, reject) => {
-          this.files.push(fileName);
-          let file = req.files[fileName];
-          FileUtil.move(file.path, path.join(folder, fileName))
-          .then(() => resolve())
-          .catch(err => reject(err));
-        });
-      }))
-      .then(() => resolve())
-      .catch(err => reject(err));
-    });
+  public async save(req: Request, folder: string): Promise<void> {
+    this.from = <string>req.fields.from;
+    this.to = <string>req.fields.to;
+
+    if (!this.from || !this.to) {
+      throw new Error("Missing converter type");
+    }
+
+    this.template = <string>req.fields.template || null;
+    this.files = await FileUtil.saveFiles(req, folder);
   }
 
   public isBinary() {
