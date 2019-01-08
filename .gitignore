@@ -1,0 +1,12 @@
+# Temporary Resources
+# resources/templates
+# resources/syntax-definitions
+resources/tmp
+resources/uploads
+
+# Generated files
+node_modules
+dist
+
+# Visual Studio Code
+.vscode
