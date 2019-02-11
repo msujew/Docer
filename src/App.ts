@@ -33,7 +33,6 @@ class App {
     //this.app.use(bodyParser.urlencoded({ extended: false, limit: "100mb" }));
     FileUtil.deleteDirSync(FileUtil.resources, FileUtil.temporary);
     FileUtil.deleteDirSync(FileUtil.resources, FileUtil.uploads);
-    //setTimeout(() => FileUtil.mkdirSync(FileUtil.resources, FileUtil.uploads), 100);
     FileUtil.mkdirSync(FileUtil.resources, FileUtil.templates);
     FileUtil.mkdirSync(FileUtil.resources, FileUtil.syntaxDefinitions);
     FileUtil.mkdirSync(FileUtil.resources, FileUtil.uploads);
@@ -46,15 +45,20 @@ class App {
     this.app.use("/convert", ConverterRoutes);
     this.app.use("/templates", TemplateRoutes);
     this.app.use("/syntax-definitions", SyntaxDefinitionRoutes);
-    this.app.use((_req, _res, next) => {
-      let err = new Error('Not Found');
-      err.status = 404;
-      next(err);
+    this.app.use((req, res, next) => {
+      if (req.path.match(/^\/?$/)) {
+        res.end();
+      } else {
+        let err = new Error('Not Found');
+        err.status = 404;
+        next(err);
+      }
     });
     this.app.use((err: Error, 
                   _req: express.Request, 
                   res: express.Response, 
                   _next: NextFunction) => {
+      console.log(err);
       res.status(err.status || 500);
       res.json({ error: { message: err.message }});
     });

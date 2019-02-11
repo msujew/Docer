@@ -28,7 +28,7 @@ class ConverterRoutes {
         await data.save(req, folder);
         let buffer = await this.pandoc.convert(data, folder);
         if (data.isBinary()) {
-          res.type(data.to);
+          res.type(data.to || "binary");
           res.end(buffer, 'binary');
         } else {
           res.send(buffer.toString("utf-8"));

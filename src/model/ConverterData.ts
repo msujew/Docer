@@ -1,5 +1,6 @@
 import { Request } from "express";
 import * as FileUtil from "../util/FileUtil";
+import * as ErrorUtil from "../util/ErrorUtil";
 
 export class ConverterData {
   /**
@@ -35,27 +36,31 @@ export class ConverterData {
    * * twiki
    * * vimwiki
    */
-  from: string;
+  from: string = "markdown";
   /**
    * Gets or sets the target format
    */
-  to: string;
+  to: string = "pdf";
   files: string[] = [];
   /**
    * Gets or sets the template for converting
    */
-  template: string;
+  template: string | undefined;
 
   public async save(req: Request, folder: string): Promise<void> {
-    this.from = <string>req.fields.from;
-    this.to = <string>req.fields.to;
+    if (req.fields) {
 
-    if (!this.from || !this.to) {
-      throw new Error("Missing converter type");
+      if (!req.fields.from || !req.fields.to) {
+        throw ErrorUtil.MissingConverterTypeError;
+      }
+      this.from = <string>req.fields.from;
+      this.to = <string>req.fields.to;
+      this.template = <string>req.fields.template;
+      this.files = await FileUtil.saveFiles(req, folder);
     }
-
-    this.template = <string>req.fields.template || null;
-    this.files = await FileUtil.saveFiles(req, folder);
+    else {
+      throw ErrorUtil.MissingFieldError;
+    }
   }
 
   public isBinary() {

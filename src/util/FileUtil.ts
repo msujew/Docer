@@ -12,8 +12,8 @@ export function combine(...paths: string[]): string {
 	return path.join(...paths);
 }
 
-export function write(buffer: Buffer, ...fileName: string[]): Promise<void> {
-	mkdirsSync(...fileName);
+export async function write(buffer: Buffer, ...fileName: string[]): Promise<void> {
+	await mkdirs(...fileName);
 	return fs.writeFile(combine(...fileName), buffer);
 }
 
@@ -38,15 +38,34 @@ export function readdirSync(...folder: string[]): string[] {
 	return fs.readdirSync(combine(...folder));
 }
 
-export async function readdirStats(...folder: string[]): Promise<[string, fs.Stats][]> {
+export async function* readdirRecursive(...folder: string[]): AsyncIterableIterator<string> {
+	let fullPath = combine(...folder);
+	let subdirs = await readdir(fullPath);
+	for (let subdir of subdirs) {
+		let res = path.resolve(fullPath, subdir);
+		if ((await fs.stat(res)).isDirectory()) {
+			yield* readdirRecursive(res);
+		} else {
+			yield res;
+		}
+	}
+}
+
+export async function* readdirRecursiveFiltered(filter: string, ...folder: string[]): AsyncIterableIterator<string> {
+	for await (let item of readdirRecursive(...folder)) {
+		if (item.endsWith(filter)) {
+			yield item;
+		}
+	}
+}
+
+export async function* readdirStats(...folder: string[]): AsyncIterableIterator<[string, fs.Stats]> {
 	let fileNames = await readdir(combine(...folder));
-	let stats: [string, fs.Stats][] = [];
 	for (let fileName of fileNames) {
 		let fullPath = combine(...folder, fileName);
 		let stat = await fs.stat(fullPath);
-		stats.push([fileName, stat]);
+		yield [fileName, stat];
 	}
-	return stats;
 }
 
 export async function mkdir(...folder: string[]): Promise<void> {
@@ -88,10 +107,12 @@ export function moveSync(src: string, dest: string) {
 export async function saveFiles(req: Request, folder: string): Promise<string[]> {
 	await mkdir(folder);
 	let files: string[] = [];
-	for (let fileName of Object.keys(req.files)) {
-		files.push(fileName);
-		let file = req.files[fileName];
-		await move(file.path, combine(folder, fileName));
+	if (req.files) {
+		for (let fileName of Object.keys(req.files)) {
+			files.push(fileName);
+			let file = req.files[fileName];
+			await move(file.path, combine(folder, fileName));
+		}
 	}
 	return files;
 }

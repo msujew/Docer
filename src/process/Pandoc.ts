@@ -1,6 +1,7 @@
 import { ConverterData } from "../model/ConverterData";
 import { spawn } from "child_process";
 import * as FileUtil from "../util/FileUtil";
+import * as ErrorUtil from "../util/ErrorUtil";
 
 export class Pandoc {
 
@@ -22,12 +23,13 @@ export class Pandoc {
     return Pandoc.instance;
   }
 
-  public async convert(data: ConverterData, folder: string): Promise<Buffer> {
-    return new Promise<Buffer>((resolve, reject) => {
+  public convert(data: ConverterData, folder: string): Promise<Buffer> {
+    return new Promise<Buffer>(async (resolve, reject) => {
       let content = FileUtil.combine(folder, "content");
       let file = FileUtil.combine(folder, "result." + data.to);
-      let args = [ "-s", "-f", data.from, "--resource-path", folder, "--listings" ];
+      let args = [ "-f", data.from, "--resource-path", folder, "--listings" ];
       this.setTemplate(data, args);
+      await this.setBibliography(folder, args);
 
       if (data.to === "pdf") args.push("-t", "latex");
       else args.push("-t", data.to);
@@ -39,10 +41,12 @@ export class Pandoc {
       args.push("-o", file);
       args.push(content);
       
+      console.log(args);
+
       let pandoc = spawn("pandoc", args);
-      pandoc.on('close', (code) => {
+      pandoc.on('close', code => {
         if (code !== 0) {
-          reject(new Error("Pandoc finished unexpectedly"));
+          reject(ErrorUtil.PandocFailedError);
         } else {
           FileUtil.read(file).then(buffer => {
             FileUtil.deleteDir(folder);
@@ -56,10 +60,17 @@ export class Pandoc {
   }
 
   private setTemplate(data: ConverterData, args: string[]) {
-    if (data.template !== undefined && 
-        data.template != null &&
+    if (data.template && 
         data.template.length > 0) {
       args.push("--template", FileUtil.combine("resources", "templates", data.template, "/template"));
+    } else {
+      args.push("-s");
+    }
+  }
+
+  private async setBibliography(directory: string, args: string[]) {
+    for await (let file of FileUtil.readdirRecursiveFiltered(".bib", directory)) {
+      args.push("--bibliography", file);
     }
   }
 }

@@ -3784,7 +3784,7 @@
 				<!-- Comment next line if you don't use Javadoc tool -->
 				<IncludeRules context="##Javadoc"/>
 				<keyword attribute="Keyword" context="#stay" String="keywords"/>
-        <keyword attribute="ItalicKeyword" context="#stay" String="italicKeywords"/>
+				<keyword attribute="ItalicKeyword" context="#stay" String="italicKeywords"/>
 				<keyword attribute="Data Type" context="#stay" String="types"/>
 				<keyword attribute="Java15" context="#stay" String="java15"/>
 				<RegExpr attribute="Float" context="#stay" String="(\b&int;\.?|(\b&int;)?\.&int;)([eE][\-\+]?&int;[fFdD]?|[fFdD])\b"/>
@@ -3799,8 +3799,8 @@
 				<RegExpr attribute="Decimal" context="#stay" String="//\s*BEGIN.*$" beginRegion="Region1"/>
 				<RegExpr attribute="Decimal" context="#stay" String="//\s*END.*$" endRegion="Region1"/>
 				<DetectChar attribute="String" context="String" char="&quot;"/>
-        <RegExpr attribute="String" context="SingleString" String="'[^']"/>
-        <RegExpr attribute="String" context="Template" String="'''"/>
+				<RegExpr attribute="String" context="SingleString" String="'[^']"/>
+				<RegExpr attribute="String" context="Template" String="'''"/>
 				<RegExpr attribute="Function" context="EnterPrintf" String="\.(format|printf)\b"/>
 				<Detect2Chars attribute="Comment" context="Commentar 1" char="/" char1="/"/>
 				<Detect2Chars attribute="Comment" context="Commentar 2" char="/" char1="*" beginRegion="Comment"/>
@@ -3819,30 +3819,30 @@
 				<IncludeRules context="Normal"/>
 				<DetectChar attribute="Symbol" context="#pop" char=")"/>
 			</context>
-      <context attribute="String" lineEndContext="#pop" name="StringBase">
-        <LineContinue attribute="String" context="#stay"/>
-        <HlCStringChar attribute="String Char" context="#stay"/>
-        <RegExpr attribute="String Char" context="#stay" String="\\u[0-9a-fA-F]{4}"/>
-      </context>
-      <context attribute="String" lineEndContext="#pop" name="String">
-        <IncludeRules context="StringBase"/>
-        <DetectChar attribute="String" context="#pop" char="&quot;"/>
-      </context>
-      <context attribute="String" lineEndContext="#pop" name="SingleString">
-        <IncludeRules context="StringBase"/>
-        <DetectChar attribute="String" context="#pop" char="'"/>
-      </context>
-      <context attribute="String" lineEndContext="#stay" name="Template">
-        <RegExpr attribute="Template" context="#pop" String="'''"/>
-        <RegExpr attribute="String" context="TemplateComment" String="«««"/>
-        <RegExpr attribute="String Char" context="#stay" String="\\u[0-9a-fA-F]{4}"/>
-        <DetectChar attribute="Symbol" context="TemplateExpression" char="«"/>
-      </context>
-      <context attribute="Normal Text" lineEndContext="#stay" name="TemplateExpression">
-        <IncludeRules context="Normal"/>
-        <keyword attribute="Keyword" context="#stay" String="templateKeywords"/>
-        <DetectChar attribute="Symbol" context="#pop" char="»"/>
-      </context>
+		    <context attribute="String" lineEndContext="#pop" name="StringBase">
+			  <LineContinue attribute="String" context="#stay"/>
+			  <HlCStringChar attribute="String Char" context="#stay"/>
+			  <RegExpr attribute="String Char" context="#stay" String="\\u[0-9a-fA-F]{4}"/>
+		    </context>
+		    <context attribute="String" lineEndContext="#pop" name="String">
+				<IncludeRules context="StringBase"/>
+				<DetectChar attribute="String" context="#pop" char="&quot;"/>
+			</context>
+		    <context attribute="String" lineEndContext="#pop" name="SingleString">
+				<IncludeRules context="StringBase"/>
+				<DetectChar attribute="String" context="#pop" char="'"/>
+		    </context>
+		    <context attribute="String" lineEndContext="#stay" name="Template">
+				<RegExpr attribute="Template" context="#pop" String="'''"/>
+				<RegExpr attribute="String" context="TemplateComment" String="«««"/>
+				<RegExpr attribute="String Char" context="#stay" String="\\u[0-9a-fA-F]{4}"/>
+				<DetectChar attribute="Symbol" context="TemplateExpression" char="«"/>
+		    </context>
+		    <context attribute="Normal Text" lineEndContext="#stay" name="TemplateExpression">
+				<IncludeRules context="Normal"/>
+				<keyword attribute="Keyword" context="#stay" String="templateKeywords"/>
+				<DetectChar attribute="Symbol" context="#pop" char="»"/>
+		    </context>
 			<context attribute="Normal Text" lineEndContext="#stay" name="EnterPrintf" fallthrough="true" fallthroughContext="#pop">
 				<DetectChar attribute="Symbol" context="Printf" char="("/>
 				<DetectSpaces attribute="Normal Text" context="#stay"/>
@@ -3875,15 +3875,15 @@
 				<Detect2Chars attribute="Comment" context="#pop" char="*" char1="/" endRegion="Comment"/>
 				<IncludeRules context="##Alerts"/>
 			</context>
-      <context attribute="Comment" lineEndContext="#pop" name="TemplateComment">
-        <IncludeRules context="##Alerts"/>
-      </context>
+			<context attribute="Comment" lineEndContext="#pop" name="TemplateComment">
+				<IncludeRules context="##Alerts"/>
+			</context>
 		</contexts>
 		<itemDatas>
 			<itemData name="Normal Text"  defStyleNum="dsNormal" spellChecking="false"/>
 			<itemData name="Keyword"      defStyleNum="dsKeyword" spellChecking="false"/>
-      <!-- Italic keywords are denoted as "others" to style them specificially -->
-      <itemData name="ItalicKeyword" defStyleNum="dsOthers" spellChecking="false"/>
+			<!-- Italic keywords are denoted as "others" to style them specificially -->
+			<itemData name="ItalicKeyword" defStyleNum="dsOthers" spellChecking="false"/>
 			<itemData name="Annotation"   defStyleNum="dsAttribute" spellChecking="false"/>
 			<itemData name="Function"     defStyleNum="dsFunction" spellChecking="false"/>
 			<itemData name="StaticImports" defStyleNum="dsImport" spellChecking="false"/>
