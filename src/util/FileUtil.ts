@@ -3,6 +3,7 @@ import * as fs from "fs-extra";
 import * as path from "path";
 
 export const resources = "resources";
+export const csl = "csl";
 export const templates = "templates";
 export const syntaxDefinitions = "syntax-definitions";
 export const temporary = "tmp";
@@ -109,9 +110,11 @@ export async function saveFiles(req: Request, folder: string): Promise<string[]>
 	let files: string[] = [];
 	if (req.files) {
 		for (let fileName of Object.keys(req.files)) {
-			files.push(fileName);
-			let file = req.files[fileName];
-			await move(file.path, combine(folder, fileName));
+			if (fileName.indexOf("..") == -1) {
+				files.push(fileName);
+				let file = req.files[fileName];
+				await move(file.path, combine(folder, fileName));
+			}
 		}
 	}
 	return files;

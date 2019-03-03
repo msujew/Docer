@@ -46,6 +46,7 @@ export class ConverterData {
    * Gets or sets the template for converting
    */
   template: string | undefined;
+  csl: string | undefined;
 
   public async save(req: Request, folder: string): Promise<void> {
     if (req.fields) {
@@ -56,6 +57,7 @@ export class ConverterData {
       this.from = <string>req.fields.from;
       this.to = <string>req.fields.to;
       this.template = <string>req.fields.template;
+      this.csl = <string>req.fields.csl;
       this.files = await FileUtil.saveFiles(req, folder);
     }
     else {
@@ -64,8 +66,7 @@ export class ConverterData {
   }
 
   public isBinary() {
-    switch (this.to)
-    {
+    switch (this.to) {
       case "pdf":
       case "odt":
       case "doc":
@@ -74,4 +75,15 @@ export class ConverterData {
     }
     return false;
   };
+
+  public isPlainText() {
+    switch (this.to) {
+      case "markdown":
+      case "latex":
+      case "txt":
+      case "html":
+        return true;
+    }
+    return false;
+  }
 }

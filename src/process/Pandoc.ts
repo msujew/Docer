@@ -29,7 +29,12 @@ export class Pandoc {
       let file = FileUtil.combine(folder, "result." + data.to);
       let args = [ "-f", data.from, "--resource-path", folder, "--listings", "-V", `resources=${folder.split("\\").join("/")}` ];
       this.setTemplate(data, args);
+      this.setCsl(data, args);
       await this.setBibliography(folder, args);
+
+      if (data.isPlainText()) {
+        args.push("--wrap=none");
+      }
 
       if (data.to === "pdf") args.push("-t", "latex");
       else args.push("-t", data.to);
@@ -62,9 +67,16 @@ export class Pandoc {
   private setTemplate(data: ConverterData, args: string[]) {
     if (data.template && 
         data.template.length > 0) {
-      args.push("--template", FileUtil.combine("resources", "templates", data.template, "/template"));
+      args.push("--template", FileUtil.combine(FileUtil.resources, FileUtil.templates, data.template, "template"));
     } else {
       args.push("-s");
+    }
+  }
+
+  private setCsl(data: ConverterData, args: string[]) {
+    if (data.csl && 
+        data.csl.length > 0) {
+      args.push("--csl", FileUtil.combine(FileUtil.resources, FileUtil.csl, data.csl + ".csl"));
     }
   }
 

@@ -6,6 +6,7 @@ import * as formidable from "express-formidable";
 import ConverterRoutes from "./routes/ConverterRoutes";
 import TemplateRoutes from "./routes/TemplateRoutes";
 import SyntaxDefinitionRoutes from "./routes/SyntaxDefinitionRoutes";
+import CslRoutes from "./routes/CslRoutes";
 import { NextFunction } from "connect";
 import * as FileUtil from "./util/FileUtil";
 
@@ -45,6 +46,7 @@ class App {
     this.app.use("/convert", ConverterRoutes);
     this.app.use("/templates", TemplateRoutes);
     this.app.use("/syntax-definitions", SyntaxDefinitionRoutes);
+    this.app.use("/csl", CslRoutes);
     this.app.use((req, res, next) => {
       if (req.path.match(/^\/?$/)) {
         res.end();
