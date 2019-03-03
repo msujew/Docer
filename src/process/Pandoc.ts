@@ -27,7 +27,7 @@ export class Pandoc {
     return new Promise<Buffer>(async (resolve, reject) => {
       let content = FileUtil.combine(folder, "content");
       let file = FileUtil.combine(folder, "result." + data.to);
-      let args = [ "-f", data.from, "--resource-path", folder, "--listings" ];
+      let args = [ "-f", data.from, "--resource-path", folder, "--listings", "-V", `resources=${folder.split("\\").join("/")}` ];
       this.setTemplate(data, args);
       await this.setBibliography(folder, args);
 

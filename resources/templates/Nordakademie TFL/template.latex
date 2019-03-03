@@ -21,6 +21,7 @@
 \usepackage{setspace}
 \setstretch{1,2381}
 \usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+\usepackage{lmodern,textcomp}
 
 %%% Examples of Article customizations
 % These packages are optional, depending whether you want the features they provide.
@@ -37,6 +38,25 @@ $if(listings-no-page-break)$
 $endif$
 
 \usepackage{graphicx} % support the \includegraphics command and options
+
+\makeatletter
+\def\ScaleWidthIfNeeded{%
+ \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\def\ScaleHeightIfNeeded{%
+  \ifdim\Gin@nat@height>0.9\textheight
+    0.9\textheight
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\setkeys{Gin}{width=\ScaleWidthIfNeeded,height=\ScaleHeightIfNeeded,keepaspectratio}
 
 % \usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
 
@@ -248,11 +268,12 @@ $endif$
 \sloppy
 $body$
 
-\printbibliography$if(biblio-title)$[title=$biblio-title$]$endif$
+\printbibliography
 
-$for(include-after)$
-$include-after$
+%$for(include-after)$
 
-$endfor$
+% \includepdf[pages={1-}]{$resources$/$include-after$}
+
+%$endfor$
 
 \end{document}
