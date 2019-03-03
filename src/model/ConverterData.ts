@@ -47,6 +47,7 @@ export class ConverterData {
    */
   template: string | undefined;
   csl: string | undefined;
+  extension: string | undefined;
 
   public async save(req: Request, folder: string): Promise<void> {
     if (req.fields) {
@@ -58,6 +59,7 @@ export class ConverterData {
       this.to = <string>req.fields.to;
       this.template = <string>req.fields.template;
       this.csl = <string>req.fields.csl;
+      this.extension = <string>req.fields.ext;
       this.files = await FileUtil.saveFiles(req, folder);
     }
     else {

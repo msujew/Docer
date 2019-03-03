@@ -44,7 +44,7 @@ export class Pandoc {
       }
 
       args.push("-o", file);
-      args.push(content);
+      await this.findAllInputFiles(folder, data.extension, args);
       
       console.log(args);
 
@@ -83,6 +83,16 @@ export class Pandoc {
   private async setBibliography(directory: string, args: string[]) {
     for await (let file of FileUtil.readdirRecursiveFiltered(".bib", directory)) {
       args.push("--bibliography", file);
+    }
+  }
+
+  private async findAllInputFiles(directory: string, extension: string | undefined, args: string[]) {
+    if (extension) {
+      for await (let file of FileUtil.readdirRecursiveFiltered(extension, directory)) {
+        args.push(file);
+      }
+    } else {
+      args.push(FileUtil.combine(directory, "content"));
     }
   }
 }
