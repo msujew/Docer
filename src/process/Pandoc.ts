@@ -49,12 +49,15 @@ export class Pandoc {
       console.log(args);
 
       let pandoc = spawn("pandoc", args);
+      pandoc.stderr.on('data', data => {
+        console.log("Pandoc Error" + data);
+      })
       pandoc.on('close', code => {
         if (code !== 0) {
           reject(ErrorUtil.PandocFailedError);
         } else {
           FileUtil.read(file).then(buffer => {
-            FileUtil.deleteDir(folder);
+            //FileUtil.deleteDir(folder);
             resolve(buffer);
           }).catch(err => {
             reject(err);

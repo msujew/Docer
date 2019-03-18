@@ -56,6 +56,16 @@ $endif$
 }
 \makeatother
 
+$if(forceimages)$
+\usepackage{float}
+\let\origfigure\figure
+\let\endorigfigure\endfigure
+\renewenvironment{figure}[1][2] {
+    \expandafter\origfigure\expandafter[H]
+} {
+    \endorigfigure
+}
+$endif$
 \setkeys{Gin}{width=\ScaleWidthIfNeeded,height=\ScaleHeightIfNeeded,keepaspectratio}
 
 % \usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
@@ -72,6 +82,10 @@ $endif$
 \usepackage{acronym}
 \usepackage{sourcecodepro}
 % These packages are all incorporated in the memoir class to one degree or another...
+
+% In order to remove widows, we set an extremely high penalty
+\widowpenalty10000
+\clubpenalty10000
 
 %%% TABLES
 $if(tables)$
@@ -252,6 +266,9 @@ $endfor$
 %%% The "real" document content comes below...
 
 \begin{document}
+$if(include-before)$
+\includepdf[pages={1-}]{$resources$/$include-before$}
+$endif$
 \tableofcontents 
 $if(lot)$
 \listoftables
@@ -270,10 +287,13 @@ $body$
 
 \printbibliography
 
-%$for(include-after)$
+$if(include-after)$
+\addcontentsline{toc}{section}{Anhang}
+$endif$
+$for(include-after)$
 
-% \includepdf[pages={1-}]{$resources$/$include-after$}
+\includepdf[pages={1-}]{$resources$/$include-after$}
 
-%$endfor$
+$endfor$
 
 \end{document}
