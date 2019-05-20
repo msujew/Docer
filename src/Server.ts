@@ -1,6 +1,7 @@
-import app from "./app";
+import app from "./App";
 const PORT = 3030;
+const HOST = "0.0.0.0";
 
-app.listen(PORT, () => {
-  console.log('Express server listening on port ' + PORT);
+app.listen(PORT, HOST, () => {
+  console.log('Express server listening on ' + HOST + ":" + PORT);
 });
