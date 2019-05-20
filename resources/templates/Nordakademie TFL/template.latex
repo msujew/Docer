@@ -288,6 +288,7 @@ $body$
 \printbibliography
 
 $if(include-after)$
+\pagebreak
 \addcontentsline{toc}{section}{Anhang}
 $endif$
 $for(include-after)$
