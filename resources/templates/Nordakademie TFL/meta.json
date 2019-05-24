@@ -1,0 +1,24 @@
+{
+	"disable-arabic-start": {
+        "optional": "true",
+        "type": "boolean"
+    },
+    "include-before": {
+        "optional": "true",
+        "type": "string"
+    },
+    "include-after": {
+        "optional": "true",
+        "type": "string",
+        "array": "true"
+    },
+    "lang": {
+        "optional": "true",
+        "type": "string",
+        "regex": "[a-z]{2}-[A-Z]{2}"
+    },
+    "force-image-position": {
+        "optional": "true",
+        "type": "boolean"
+    }
+}

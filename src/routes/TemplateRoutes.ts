@@ -25,8 +25,18 @@ class TemplateRoutes {
         .then(templates => res.json(templates))
         .catch(err => next(err));
     });
-    this.router.get("/:name", (_req: Request, _res: Response, next: NextFunction) => {
-      next(new Error("Not implemented"));
+    this.router.get("/:name", (req: Request, res: Response, next: NextFunction) => {
+      if (req.fields && req.fields.name) {
+        let name = <string>req.fields.name
+        FileUtil.read(FileUtil.resources, FileUtil.templates, name, "meta.json")
+          .then(buffer => {
+            res.type("application/json")
+            res.send(buffer);
+          })
+          .catch(err => next(err));
+      } else {
+        next(ErrorUtil.MissingFieldError("name"));
+      }
     });
     this.router.post("/", (req: Request, res: Response, next: NextFunction) => {
       let template = new Template();
