@@ -9,6 +9,7 @@ import SyntaxDefinitionRoutes from "./routes/SyntaxDefinitionRoutes";
 import CslRoutes from "./routes/CslRoutes";
 import { NextFunction } from "connect";
 import * as FileUtil from "./util/FileUtil";
+import WorkspaceRoutes from "./routes/WorkspaceRoutes";
 
 declare global {
     interface Error {
@@ -47,6 +48,7 @@ class App {
         this.app.use("/templates", TemplateRoutes);
         this.app.use("/syntax-definitions", SyntaxDefinitionRoutes);
         this.app.use("/csl", CslRoutes);
+        this.app.use("/workspace", WorkspaceRoutes);
         this.app.use((req, res, next) => {
             if (req.path.match(/^\/?$/)) {
                 res.end();

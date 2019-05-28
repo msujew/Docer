@@ -20,6 +20,8 @@
     "express-formidable": "^1.2.0",
     "fs-extra": "^7.0.1",
     "morgan": "^1.9.1",
+    "sqlite3": "^4.0.8",
+    "typeorm": "^0.2.17",
     "typescript": "^3.2.1"
   },
   "devDependencies": {}
