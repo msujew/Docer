@@ -3,45 +3,15 @@ import * as FileUtil from "../util/FileUtil";
 import * as ErrorUtil from "../util/ErrorUtil";
 
 export class ConverterData {
+
   /**
-   * Gets or sets the source format.  
-   * Available formats:
-   * * commonmark
-   * * creole
-   * * docbook
-   * * docx
-   * * epub
-   * * fb2
-   * * gfm
-   * * haddock
-   * * html
-   * * jats
-   * * json
-   * * latex
-   * * markdown
-   * * markdown_mmd
-   * * markdown_phpextra
-   * * markdown_strict
-   * * mediawiki
-   * * man
-   * * muse
-   * * native
-   * * odt
-   * * opml
-   * * org
-   * * rst
-   * * t2t
-   * * textile
-   * * tikiwiki
-   * * twiki
-   * * vimwiki
+   * Gets or sets the source format.
    */
   from: string = "markdown";
   /**
    * Gets or sets the target format
    */
   to: string = "pdf";
-  files: string[] = [];
   /**
    * Gets or sets the template for converting
    */
@@ -60,7 +30,7 @@ export class ConverterData {
       this.template = <string>req.fields.template;
       this.csl = <string>req.fields.csl;
       this.extension = <string>req.fields.ext;
-      this.files = await FileUtil.saveFiles(req, folder);
+      await FileUtil.saveFiles(req, folder);
     }
     else {
       throw ErrorUtil.MissingFieldError;
