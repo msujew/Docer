@@ -1,7 +1,7 @@
 import { NextFunction } from "connect";
 import { Request, Response, Router } from "express";
-import { ConverterData } from "../model/ConverterData";
-import { Pandoc } from "../process/Pandoc";
+import ConverterData from "../model/ConverterData";
+import Pandoc from "../process/Pandoc";
 import * as FileUtil from "../util/FileUtil";
 
 class ConverterRoutes {

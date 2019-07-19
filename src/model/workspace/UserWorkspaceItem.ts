@@ -1,7 +1,7 @@
 import { PrimaryColumn, Column, Entity, BaseEntity } from "typeorm";
 
 @Entity()
-export class UserWorkspaceItem extends BaseEntity {
+export default class UserWorkspaceItem extends BaseEntity {
 
     @PrimaryColumn()
     public path: string = "";

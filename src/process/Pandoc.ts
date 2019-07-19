@@ -1,9 +1,9 @@
-import { ConverterData } from "../model/ConverterData";
+import ConverterData from "../model/ConverterData";
 import { spawn } from "child_process";
 import * as FileUtil from "../util/FileUtil";
 import * as ErrorUtil from "../util/ErrorUtil";
 
-export class Pandoc {
+export default class Pandoc {
 
     public syntaxDefinitions: string[] = [];
 

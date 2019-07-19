@@ -1,22 +1,33 @@
 import app from "./App";
 import { createConnection } from "typeorm";
-import { UserWorkspace } from "./model/workspace/UserWorkspace";
-import { UserWorkspaceItem } from "./model/workspace/UserWorkspaceItem";
+import User from "./model/workspace/User";
+import UserWorkspace from "./model/workspace/UserWorkspace";
+import UserWorkspaceItem from "./model/workspace/UserWorkspaceItem";
+import UserSession from "./model/workspace/UserSession";
 const PORT = 3030;
 const HOST = "0.0.0.0";
 
-createConnection({
-    type: "sqlite",
-    database: "workspace.db",
-    entities: [
-        UserWorkspace,
-        UserWorkspaceItem
-    ],
-    synchronize: true,
-    logging: false
-}).then(_connection => {
+async function run() {
+    await createConnection({
+        type: "sqlite",
+        database: "workspace.db",
+        entities: [
+            User,
+            UserSession,
+            UserWorkspace,
+            UserWorkspaceItem
+        ],
+        synchronize: true,
+        logging: false
+    });
     console.log("Connected to Database");
     app.listen(PORT, HOST, () => {
         console.log('Express server listening on ' + HOST + ":" + PORT);
     });
-}).catch(error => console.log(error));
+}
+
+try {
+    run();
+} catch (err) {
+    console.log(err);
+}

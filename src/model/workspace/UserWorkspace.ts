@@ -1,7 +1,7 @@
 import { Entity, PrimaryColumn, Column, BaseEntity } from "typeorm";
 
 @Entity()
-export class UserWorkspace extends BaseEntity {
+export default class UserWorkspace extends BaseEntity {
 
     @PrimaryColumn()
     public user: string = "";
@@ -10,5 +10,5 @@ export class UserWorkspace extends BaseEntity {
     public files: string[] | undefined;
 
     @Column("simple-array")
-    public directores: string[] | undefined;
+    public directories: string[] | undefined;
 }

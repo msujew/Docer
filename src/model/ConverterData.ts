@@ -2,7 +2,7 @@ import { Request } from "express";
 import * as FileUtil from "../util/FileUtil";
 import * as ErrorUtil from "../util/ErrorUtil";
 
-export class ConverterData {
+export default class ConverterData {
 
   /**
    * Gets or sets the source format.

@@ -2,7 +2,7 @@ import { Request } from "express";
 import * as FileUtil from "../util/FileUtil";
 import * as ErrorUtil from "../util/ErrorUtil";
 
-export class Template {
+export default class Template {
 
      public name: string = "";
      public icon: string | undefined;

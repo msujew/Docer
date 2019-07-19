@@ -1,5 +1,4 @@
 import * as express from "express";
-import * as bodyParser from "body-parser";
 import * as morgan from "morgan";
 import * as formidable from "express-formidable";
 
@@ -10,6 +9,8 @@ import CslRoutes from "./routes/CslRoutes";
 import { NextFunction } from "connect";
 import * as FileUtil from "./util/FileUtil";
 import WorkspaceRoutes from "./routes/WorkspaceRoutes";
+import RegisterRoutes from "./routes/RegisterRoutes";
+import LoginRoutes from "./routes/LoginRoutes";
 
 declare global {
     interface Error {
@@ -30,9 +31,6 @@ class App {
     private config() {
         // support application/json type post data
         this.app.use(morgan("dev"));
-        //this.app.use(bodyParser.json({ limit: "100mb" }));
-        //support application/x-www-form-urlencoded post data
-        //this.app.use(bodyParser.urlencoded({ extended: false, limit: "100mb" }));
         FileUtil.deleteDirSync(FileUtil.resources, FileUtil.temporary);
         FileUtil.deleteDirSync(FileUtil.resources, FileUtil.uploads);
         FileUtil.mkdirSync(FileUtil.resources, FileUtil.templates);
@@ -44,11 +42,13 @@ class App {
                 uploadDir: FileUtil.combine(process.cwd(), FileUtil.resources, FileUtil.uploads)
             })
         );
+        this.app.use("/login",  LoginRoutes);
         this.app.use("/convert", ConverterRoutes);
         this.app.use("/templates", TemplateRoutes);
         this.app.use("/syntax-definitions", SyntaxDefinitionRoutes);
         this.app.use("/csl", CslRoutes);
         this.app.use("/workspace", WorkspaceRoutes);
+        this.app.use("/register", RegisterRoutes);
         this.app.use((req, res, next) => {
             if (req.path.match(/^\/?$/)) {
                 res.end();

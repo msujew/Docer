@@ -1,10 +1,10 @@
 import { NextFunction } from "connect";
 import { Request, Response, Router } from "express";
-import { UserWorkspace } from "../model/workspace/UserWorkspace";
-import { UserWorkspaceItem } from "../model/workspace/UserWorkspaceItem";
-import * as FileUtil from "../util/FileUtil";
+import UserWorkspace from "../model/workspace/UserWorkspace";
+import UserWorkspaceItem from "../model/workspace/UserWorkspaceItem";
 import * as ErrorUtil from "../util/ErrorUtil";
 import { readFile } from "fs-extra";
+import * as auth from "../process/Auth";
 
 class WorkspaceRoutes {
 
@@ -16,93 +16,148 @@ class WorkspaceRoutes {
     }
 
     private setup() {
-        this.router.param("user", (req: Request, _res: Response, next: NextFunction, user: string) => {
-            if (req.fields) {
-                req.fields.user = user;
-            }
-            next();
-        });
-        this.router.get("/:user", async (req: Request, res: Response, next: NextFunction) => {
-            if (req.fields && req.fields.user) {
-                let user = <string>req.fields.user
-                let workspace = await UserWorkspace.findOne({ where: { user: user }});
-                
-                if (!workspace) {
-                    workspace = new UserWorkspace();
-                    workspace.user = user;
-                    workspace.files = [];
-                    workspace.directores = [];
-                    await workspace.save();
-                }
-                res.json(workspace);
-            } else {
-                next(ErrorUtil.MissingFieldError("user"));
-            }
-        });
-        this.router.get("/:user/file", async (req: Request, res: Response, next: NextFunction) => {
-            if (req.fields && req.fields.name && req.fields.user && req.files) {
-                let user = <string>req.fields.user;
-                let path = <string>req.fields.name;
-                let workspaceItem = await UserWorkspaceItem.findOne({ where: { user: user, path: path }});
-                if (workspaceItem) {
-                    res.send(workspaceItem.content);
-                }
-                res.send();
-            } else {
-                next(ErrorUtil.MissingFieldError("user"));
-            }
-        });
-        this.router.post("/:user", async (req: Request, res: Response, next: NextFunction) => {
-            if (req.fields && req.fields.user) {
-                let workspace = new UserWorkspace();
-                workspace.user = <string>req.fields.user;
-                workspace.files = [];
-                workspace.directores = [];
-                await workspace.save();
-                res.end();
-            } else {
-                next(ErrorUtil.MissingFieldError("user"));
-            }
-        });
-        this.router.post("/:user/file", async (req: Request, res: Response, next: NextFunction) => {
-            if (req.fields && req.fields.name && req.fields.user && req.files) {
-                let user = <string>req.fields.user;
-                let path = <string>req.fields.name;
-                let workspaceItem = await UserWorkspaceItem.findOne({ where: { user: user, path: path }});
-                if (workspaceItem) {
-                    workspaceItem.content = await readFile(req.files.content.path);
-                    await workspaceItem.save();
-                } else {
-                    let workspace = await UserWorkspace.findOne({ where: { user: user }});
-                    if (workspace && workspace.files) {
-                        workspace.files.push(path);
+        this.router.get("/", async (req: Request, res: Response, next: NextFunction) => {
+            if (req.fields && req.fields.token) {
+                let token = <string>req.fields.token;
+                let user = await auth.authenticatedUser(token);
+                if (user) {
+                    let workspace = await UserWorkspace.findOne({ user: user.name });
+
+                    if (!workspace) {
+                        workspace = new UserWorkspace();
+                        workspace.user = user.name;
+                        workspace.files = [];
+                        workspace.directories = [];
                         await workspace.save();
-                        let workspaceItem = new UserWorkspaceItem();
-                        workspaceItem.user = user;
-                        workspaceItem.path = path;
-                        workspaceItem.content = await readFile(req.files.content.path);
-                        await workspaceItem.save();
+                    }
+
+                    res.json(workspace);
+                } else {
+                    return next(ErrorUtil.NotLoggedInError);
+                }
+            } else {
+                next(ErrorUtil.MissingFieldError("token"));
+            }
+        });
+        this.router.get("/file", async (req: Request, res: Response, next: NextFunction) => {
+            if (req.fields && req.fields.name && req.fields.token) {
+                let token = <string>req.fields.token;
+                let user = await auth.authenticatedUser(token);
+                if (user) {
+                    let path = <string>req.fields.name;
+                    let workspaceItem = await UserWorkspaceItem.findOne({ user: user.name, path: path });
+                    if (workspaceItem) {
+                        res.send(workspaceItem.content);
                     }
                 }
                 res.end();
             } else {
-                next(ErrorUtil.MissingFieldError("name"));
+                next(ErrorUtil.MissingFieldError("name | token"));
             }
         });
-        this.router.delete("/:name", (req: Request, res: Response, next: NextFunction) => {
-            if (req.fields && req.fields.name) {
-                let name = <string>req.fields.name;
-                FileUtil.deleteDir(FileUtil.resources, FileUtil.templates, name)
-                    .then(() => res.end())
-                    .catch(err => next(err));
+        this.router.post("/file", async (req: Request, res: Response, next: NextFunction) => {
+            if (req.fields && req.fields.name && req.fields.token && req.files) {
+                let path = <string>req.fields.name;
+                let token = <string>req.fields.token;
+                let user = await auth.authenticatedUser(token);
+                if (user) {
+                    let workspaceItem = await UserWorkspaceItem.findOne({ user: user.name, path: path });
+                    if (workspaceItem) {
+                        workspaceItem.content = await readFile(req.files.content.path);
+                        await workspaceItem.save();
+                    } else {
+                        let workspace = await UserWorkspace.findOne({ user: user.name });
+                        if (workspace && workspace.files) {
+                            workspace.files.push(path);
+                            await workspace.save();
+                            workspaceItem = new UserWorkspaceItem();
+                            workspaceItem.user = user.name;
+                            workspaceItem.path = path;
+                            workspaceItem.content = await readFile(req.files.content.path);
+                            await workspaceItem.save();
+                        }
+                    }
+                    return res.end();
+                } else {
+                    return next(ErrorUtil.NotLoggedInError);
+                }
             } else {
-                next(ErrorUtil.MissingFieldError("name"));
+                next(ErrorUtil.MissingFieldError("name | token"));
             }
         });
-    }
-
-    private async readFile(path: string) {
-        return await FileUtil.read(path);
+        this.router.post("/folder", async (req: Request, res: Response, next: NextFunction) => {
+            if (req.fields && req.fields.name && req.fields.token) {
+                let path = <string>req.fields.name;
+                let token = <string>req.fields.token;
+                let user = await auth.authenticatedUser(token);
+                if (user) {
+                    let workspace = await UserWorkspace.findOne({ user: user.name });
+                    if (workspace && workspace.directories) {
+                        workspace.directories.push(path);
+                        await workspace.save();
+                    }
+                    return res.end();
+                } else {
+                    return next(ErrorUtil.NotLoggedInError);
+                }
+            } else {
+                next(ErrorUtil.MissingFieldError("name | token"));
+            }
+        });
+        this.router.delete("/", async (req: Request, res: Response, next: NextFunction) => {
+            if (req.fields && req.fields.token) {
+                let token = <string>req.fields.token;
+                let user = await auth.authenticatedUser(token);
+                if (user) {
+                    await UserWorkspaceItem.delete({ user: user.name });
+                    await UserWorkspace.delete({ user: user.name });
+                    return res.end();
+                } else {
+                    return next(ErrorUtil.NotLoggedInError);
+                }
+            } else {
+                next(ErrorUtil.MissingFieldError("token"));
+            }
+        });
+        this.router.delete("/folder", async (req: Request, res: Response, next: NextFunction) => {
+            if (req.fields && req.fields.name && req.fields.token) {
+                let path = <string>req.fields.name;
+                let token = <string>req.fields.token;
+                let user = await auth.authenticatedUser(token);
+                if (user) {
+                    let workspace = await UserWorkspace.findOne({ user: user.name });
+                    if (workspace && workspace.directories) {
+                        workspace.directories = workspace.directories.filter(e => e != path);
+                        await workspace.save();
+                    }
+                    return res.end();
+                } else {
+                    return next(ErrorUtil.NotLoggedInError);
+                }
+            } else {
+                next(ErrorUtil.MissingFieldError("name | token"));
+            }
+        });
+        this.router.delete("/file", async (req: Request, res: Response, next: NextFunction) => {
+            if (req.fields && req.fields.name && req.fields.token) {
+                let path = <string>req.fields.name;
+                let token = <string>req.fields.token;
+                let user = await auth.authenticatedUser(token);
+                if (user) {
+                    UserWorkspaceItem.delete({ user: user.name, path: path });
+                    let workspace = await UserWorkspace.findOne({ user: user.name });
+                    if (workspace && workspace.files) {
+                        workspace.files = workspace.files.filter(e => e != path);
+                        await workspace.save();
+                    }
+                    return res.end();
+                } else {
+                    return next(ErrorUtil.NotLoggedInError);
+                }
+            } else {
+                next(ErrorUtil.MissingFieldError("token | name"));
+            }
+        });
     }
 }
 

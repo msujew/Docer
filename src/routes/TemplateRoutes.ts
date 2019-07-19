@@ -1,6 +1,6 @@
 import { NextFunction } from "connect";
 import { Request, Response, Router } from "express";
-import { Template } from "../model/Template";
+import Template from "../model/Template";
 import * as FileUtil from "../util/FileUtil";
 import * as ErrorUtil from "../util/ErrorUtil";
 
