@@ -1,6 +1,8 @@
 import { Request } from "express";
 import * as fs from "fs-extra";
 import * as path from "path";
+import UserWorkspace from "../model/workspace/UserWorkspace";
+import UserWorkspaceItem from "../model/workspace/UserWorkspaceItem";
 
 export const resources = "resources";
 export const csl = "csl";
@@ -10,7 +12,7 @@ export const temporary = "tmp";
 export const uploads = "uploads";
 
 export function combine(...paths: string[]): string {
-	return path.join(...paths);
+	return path.join(...paths).replace('\\', '/').replace('//', '/');
 }
 
 export async function write(buffer: Buffer, ...fileName: string[]): Promise<void> {
@@ -118,4 +120,14 @@ export async function saveFiles(req: Request, folder: string): Promise<string[]>
 		}
 	}
 	return files;
+}
+
+export async function saveWorkspace(workspace: UserWorkspace, folder: string): Promise<void> {
+	await mkdir(folder);
+	let items = await UserWorkspaceItem.find({ workspace: workspace });
+	for (let item of items) {
+		if (item.content) {
+			await write(item.content, folder, item.path);
+		}
+	}
 }

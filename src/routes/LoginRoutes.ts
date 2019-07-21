@@ -20,22 +20,28 @@ class LoginRoutes {
                 try {
                     let userName = <string>req.fields.username;
                     let password = <string>req.fields.password;
-                    let user = await User.findOne(userName);
+                    let user = await User.findOne({ name: userName }, { relations: ["workspaces"] });
                     if (!user || !(await bcrypt.compare(password, user.password))) {
                         let error = new Error("Invalid credentials");
                         error.status = 401;
                         return next(error);
                     }
-                    let existing = await UserSession.findOne({ user: { name: userName }})
+                    let tokenObject = new TokenObject();
+                    if (user.workspaces) {
+                        tokenObject.workspaces = user.workspaces.map(workspace => workspace.name);
+                    }
+                    let existing = await UserSession.findOne({ user: { name: userName }});
                     if (existing) {
-                        res.send(existing.token);
+                        tokenObject.token = existing.token;
+                        res.json(tokenObject);
                         return res.end();
                     }
                     let session = new UserSession();
                     session.token = uuid();
                     session.user = user;
                     session.save();
-                    res.send(session.token);
+                    tokenObject.token = session.token;
+                    res.json(tokenObject);
                 } catch (err) {
                     return next(err);
                 }
@@ -43,6 +49,13 @@ class LoginRoutes {
             res.end();
         });
     }
+}
+
+class TokenObject {
+
+    token: string = "";
+    workspaces: string[] = [];
+
 }
 
 export default new LoginRoutes().router;
