@@ -19,7 +19,7 @@ class ConverterRoutes {
 
     private setupConverter() {
         this.router.post("/", async (req: Request, res: Response, next: NextFunction) => {
-            let folder = FileUtil.combine(FileUtil.resources, FileUtil.temporary, uuid());
+            let folder = FileUtil.combine(FileUtil.resourcesDir(), FileUtil.temporary, uuid());
             let data = new ConverterData();
             try {
                 await data.save(req, folder);

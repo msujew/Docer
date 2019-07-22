@@ -15,7 +15,7 @@ export default class Template {
                throw ErrorUtil.MissingFieldError("name");
           }
           this.files = [];
-          let folder = FileUtil.combine("resources", "templates", this.name);
+          let folder = FileUtil.combine(FileUtil.resourcesDir(), FileUtil.templates, this.name);
           this.files = await FileUtil.saveFiles(req, folder);
      }
 

@@ -254,7 +254,7 @@ class WorkspaceRoutes {
         });
         this.router.post("/convert", async (req: Request, res: Response, next: NextFunction) => {
             let pandoc = Pandoc.getInstance();
-            let folder = FileUtil.combine(FileUtil.resources, FileUtil.temporary, uuid());
+            let folder = FileUtil.combine(FileUtil.resourcesDir(), FileUtil.temporary, uuid());
             if (req.fields && req.fields.token && req.fields.workspace && req.fields.ext && req.fields.from && req.fields.to) {
                 let user = await auth.authenticatedUser(<string>req.fields.token);
                 if (user) {

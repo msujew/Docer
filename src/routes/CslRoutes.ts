@@ -7,7 +7,7 @@ class CslRoutes {
 
     public router = Router();
 
-    private folder = FileUtil.combine(FileUtil.resources, FileUtil.csl);
+    private folder = FileUtil.combine(FileUtil.resourcesDir(), FileUtil.csl);
 
     public constructor() {
         this.router = Router();

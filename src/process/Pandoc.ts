@@ -11,7 +11,7 @@ export default class Pandoc {
 
     private constructor() {
         this.syntaxDefinitions = [];
-        for (let file of FileUtil.readdirSync(FileUtil.resources, FileUtil.syntaxDefinitions)) {
+        for (let file of FileUtil.readdirSync(FileUtil.resourcesDir(), FileUtil.syntaxDefinitions)) {
             if (file.endsWith(".xml")) {
                 this.syntaxDefinitions.push(file);
             }
@@ -39,7 +39,7 @@ export default class Pandoc {
             else args.push("-t", data.to);
 
             for (let syntaxDef of this.syntaxDefinitions) {
-                args.push("--syntax-definition", FileUtil.combine(FileUtil.resources, FileUtil.syntaxDefinitions, syntaxDef));
+                args.push("--syntax-definition", FileUtil.combine(FileUtil.resourcesDir(), FileUtil.syntaxDefinitions, syntaxDef));
             }
 
             args.push("-o", file);
@@ -71,7 +71,7 @@ export default class Pandoc {
     private setTemplate(data: ConverterData, args: string[]) {
         if (data.template &&
             data.template.length > 0) {
-            args.push("--template", FileUtil.combine(FileUtil.resources, FileUtil.templates, data.template, "template"));
+            args.push("--template", FileUtil.combine(FileUtil.resourcesDir(), FileUtil.templates, data.template, "template"));
         } else {
             args.push("-s");
         }
@@ -80,7 +80,7 @@ export default class Pandoc {
     private setCsl(data: ConverterData, args: string[]) {
         if (data.csl &&
             data.csl.length > 0) {
-            args.push("--csl", FileUtil.combine(FileUtil.resources, FileUtil.csl, data.csl + ".csl"));
+            args.push("--csl", FileUtil.combine(FileUtil.resourcesDir(), FileUtil.csl, data.csl + ".csl"));
         }
     }
 

@@ -7,7 +7,7 @@ class SyntaxDefinitionRoutes {
 
     public router = Router();
 
-    private folder = FileUtil.combine(FileUtil.resources, FileUtil.syntaxDefinitions);
+    private folder = FileUtil.combine(FileUtil.resourcesDir(), FileUtil.syntaxDefinitions);
 
     public constructor() {
         this.router = Router();

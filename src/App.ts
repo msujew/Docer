@@ -31,15 +31,15 @@ class App {
     private config() {
         // support application/json type post data
         this.app.use(morgan("dev"));
-        FileUtil.deleteDirSync(FileUtil.resources, FileUtil.temporary);
-        FileUtil.deleteDirSync(FileUtil.resources, FileUtil.uploads);
-        FileUtil.mkdirSync(FileUtil.resources, FileUtil.templates);
-        FileUtil.mkdirSync(FileUtil.resources, FileUtil.syntaxDefinitions);
-        FileUtil.mkdirSync(FileUtil.resources, FileUtil.uploads);
+        FileUtil.deleteDirSync(FileUtil.resourcesDir(), FileUtil.temporary);
+        FileUtil.deleteDirSync(FileUtil.resourcesDir(), FileUtil.uploads);
+        FileUtil.mkdirSync(FileUtil.resourcesDir(), FileUtil.templates);
+        FileUtil.mkdirSync(FileUtil.resourcesDir(), FileUtil.syntaxDefinitions);
+        FileUtil.mkdirSync(FileUtil.resourcesDir(), FileUtil.uploads);
         this.app.use(formidable(
             {
                 multiples: true,
-                uploadDir: FileUtil.combine(process.cwd(), FileUtil.resources, FileUtil.uploads)
+                uploadDir: FileUtil.combine(FileUtil.resourcesDir(), FileUtil.uploads)
             })
         );
         this.app.use("/login",  LoginRoutes);

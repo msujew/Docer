@@ -4,15 +4,18 @@ import * as path from "path";
 import UserWorkspace from "../model/workspace/UserWorkspace";
 import UserWorkspaceItem from "../model/workspace/UserWorkspaceItem";
 
-export const resources = "resources";
 export const csl = "csl";
 export const templates = "templates";
 export const syntaxDefinitions = "syntax-definitions";
 export const temporary = "tmp";
 export const uploads = "uploads";
 
+export function resourcesDir() {
+	return process.env.resources || process.cwd() + "/resources";
+}
+
 export function combine(...paths: string[]): string {
-	return path.join(...paths).replace('\\', '/').replace('//', '/');
+	return path.join(...paths);
 }
 
 export async function write(buffer: Buffer, ...fileName: string[]): Promise<void> {
