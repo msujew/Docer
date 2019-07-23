@@ -26,6 +26,10 @@ RUN npm install
 # Bundle app source
 COPY . .
 
+ENV resources /www/app/data
+COPY resources ${resources}
+
+
 # Running the typescript compiler
 RUN npm run build
 
