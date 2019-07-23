@@ -1,13 +1,13 @@
 import { NextFunction } from "connect";
 import { Request, Response, Router } from "express";
-import * as FileUtil from "../util/FileUtil";
 import * as ErrorUtil from "../util/ErrorUtil";
+import * as FileUtil from "../util/FileUtil";
 
 class CslRoutes {
 
     public router = Router();
 
-    private folder = FileUtil.combine(FileUtil.resourcesDir(), FileUtil.csl);
+    private folder = FileUtil.resource(FileUtil.csl);
 
     public constructor() {
         this.router = Router();
@@ -21,47 +21,57 @@ class CslRoutes {
             }
             next();
         });
-        this.router.get("/", (_req: Request, res: Response, next: NextFunction) => {
-            this.getFiles()
-                .then(files => res.json(files))
-                .catch(err => next(err));
+        this.router.get("/", async (_req: Request, res: Response, next: NextFunction) => {
+            try {
+                const files = await this.getFiles();
+                return res.json(files);
+            } catch (err) {
+                return next(err);
+            }
         });
-        this.router.get("/:name", (req: Request, res: Response, next: NextFunction) => {
+        this.router.get("/:name", async (req: Request, res: Response, next: NextFunction) => {
             if (req.fields && req.fields.name) {
-                let file = <string>req.fields.name;
-                FileUtil.read(this.folder, file)
-                    .then(buffer => {
-                        res.type("xml");
-                        res.send(buffer.toString("utf8"));
-                    }).catch(err => next(err));
+                try {
+                    const file =  req.fields.name as string;
+                    const buffer = await FileUtil.read(this.folder, file);
+                    res.type("xml");
+                    return res.send(buffer.toString("utf8"));
+                } catch (err) {
+                    return next(err);
+                }
             } else {
-                next(ErrorUtil.MissingFieldError("name"));
+                return next(ErrorUtil.MissingFieldError(req.fields, "name"));
             }
         });
-        this.router.post("/", (req: Request, res: Response, next: NextFunction) => {
-            FileUtil.saveFiles(req, this.folder)
-                .then(() => res.end())
-                .catch(err => next(err));
+        this.router.post("/", async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                await FileUtil.saveFiles(req, this.folder);
+                return res.end();
+            } catch (err) {
+                return next(err);
+            }
         });
-        this.router.delete("/:name", (req: Request, res: Response, next: NextFunction) => {
+        this.router.delete("/:name", async (req: Request, res: Response, next: NextFunction) => {
             if (req.fields && req.fields.name) {
-                let name = <string>req.fields.name;
-                FileUtil.deleteDir(this.folder, name)
-                    .then(() => res.end())
-                    .catch(err => next(err));
-            }
-            else {
-                next(ErrorUtil.MissingFieldError("name"));
+                try {
+                    const name =  req.fields.name as string;
+                    await FileUtil.deleteDir(this.folder, name);
+                    return res.end();
+                } catch (err) {
+                    return next(err);
+                }
+            } else {
+                return next(ErrorUtil.MissingFieldError(req.fields, "name"));
             }
         });
     }
 
     private async getFiles(): Promise<string[]> {
-        let stats = FileUtil.readdirStats(this.folder);
-        let definitions: string[] = [];
-        for await (let stat of stats) {
+        const stats = FileUtil.readdirStats(this.folder);
+        const definitions: string[] = [];
+        for await (const stat of stats) {
             let name = stat[0];
-            let file = stat[1];
+            const file = stat[1];
             if (file.isFile() && name.endsWith(".csl")) {
                 name = name.substring(0, name.indexOf(".csl"));
                 definitions.push(name);

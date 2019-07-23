@@ -1,9 +1,9 @@
 import { NextFunction } from "connect";
 import { Request, Response, Router } from "express";
+import { v4 as uuid } from "uuid";
 import ConverterData from "../model/ConverterData";
 import Pandoc from "../process/Pandoc";
 import * as FileUtil from "../util/FileUtil";
-import { v4 as uuid } from "uuid";
 
 class ConverterRoutes {
 
@@ -19,20 +19,19 @@ class ConverterRoutes {
 
     private setupConverter() {
         this.router.post("/", async (req: Request, res: Response, next: NextFunction) => {
-            let folder = FileUtil.combine(FileUtil.resourcesDir(), FileUtil.temporary, uuid());
-            let data = new ConverterData();
+            const folder = FileUtil.resource(FileUtil.temporary, uuid());
+            const data = new ConverterData();
             try {
                 await data.save(req, folder);
-                let buffer = await this.pandoc.convert(data, folder);
+                const buffer = await this.pandoc.convert(data, folder);
                 if (data.isBinary()) {
                     res.type(data.to || "binary");
-                    res.end(buffer, 'binary');
+                    return res.end(buffer, "binary");
                 } else {
-                    res.send(buffer.toString("utf-8"));
+                    return res.end(buffer.toString("utf-8"));
                 }
-            }
-            catch (err) {
-                next(err);
+            } catch (err) {
+                return next(err);
             }
         });
     }

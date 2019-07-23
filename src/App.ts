@@ -1,21 +1,22 @@
 import * as express from "express";
-import * as morgan from "morgan";
 import * as formidable from "express-formidable";
+import * as morgan from "morgan";
 
-import ConverterRoutes from "./routes/ConverterRoutes";
-import TemplateRoutes from "./routes/TemplateRoutes";
-import SyntaxDefinitionRoutes from "./routes/SyntaxDefinitionRoutes";
-import CslRoutes from "./routes/CslRoutes";
 import { NextFunction } from "connect";
-import * as FileUtil from "./util/FileUtil";
-import WorkspaceRoutes from "./routes/WorkspaceRoutes";
-import RegisterRoutes from "./routes/RegisterRoutes";
+import ConverterRoutes from "./routes/ConverterRoutes";
+import CslRoutes from "./routes/CslRoutes";
 import LoginRoutes from "./routes/LoginRoutes";
+import RegisterRoutes from "./routes/RegisterRoutes";
+import SyntaxDefinitionRoutes from "./routes/SyntaxDefinitionRoutes";
+import TemplateRoutes from "./routes/TemplateRoutes";
+import WorkspaceRoutes from "./routes/WorkspaceRoutes";
+import * as FileUtil from "./util/FileUtil";
 
 declare global {
+    // tslint:disable-next-line: interface-name
     interface Error {
-        /** Appended http status */
         status?: number;
+        code?: number;
     }
 }
 
@@ -29,19 +30,16 @@ class App {
     }
 
     private config() {
-        // support application/json type post data
         this.app.use(morgan("dev"));
         FileUtil.deleteDirSync(FileUtil.resourcesDir(), FileUtil.temporary);
         FileUtil.deleteDirSync(FileUtil.resourcesDir(), FileUtil.uploads);
         FileUtil.mkdirSync(FileUtil.resourcesDir(), FileUtil.templates);
         FileUtil.mkdirSync(FileUtil.resourcesDir(), FileUtil.syntaxDefinitions);
         FileUtil.mkdirSync(FileUtil.resourcesDir(), FileUtil.uploads);
-        this.app.use(formidable(
-            {
-                multiples: true,
-                uploadDir: FileUtil.combine(FileUtil.resourcesDir(), FileUtil.uploads)
-            })
-        );
+        this.app.use(formidable({
+            multiples: true,
+            uploadDir: FileUtil.resource(FileUtil.uploads)
+        }));
         this.app.use("/login",  LoginRoutes);
         this.app.use("/convert", ConverterRoutes);
         this.app.use("/templates", TemplateRoutes);
@@ -53,18 +51,18 @@ class App {
             if (req.path.match(/^\/?$/)) {
                 res.end();
             } else {
-                let err = new Error('Not Found');
+                const err = new Error("Not Found");
                 err.status = 404;
                 next(err);
             }
         });
         this.app.use((err: Error,
-            _req: express.Request,
-            res: express.Response,
-            _next: NextFunction) => {
+                      _req: express.Request,
+                      res: express.Response,
+                      _next: NextFunction) => {
             console.log(err);
             res.status(err.status || 500);
-            res.json({ error: { message: err.message } });
+            res.json({ error: { message: err.message, code: err.code } });
         });
     }
 }

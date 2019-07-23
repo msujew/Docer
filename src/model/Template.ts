@@ -1,6 +1,6 @@
 import { Request } from "express";
-import * as FileUtil from "../util/FileUtil";
 import * as ErrorUtil from "../util/ErrorUtil";
+import * as FileUtil from "../util/FileUtil";
 
 export default class Template {
 
@@ -10,12 +10,12 @@ export default class Template {
 
      public async save(req: Request): Promise<void> {
           if (req.fields && req.fields.name) {
-               this.name = <string>req.fields.name;
+               this.name = req.fields.name as string;
           } else {
-               throw ErrorUtil.MissingFieldError("name");
+               throw ErrorUtil.MissingFieldError(req.fields, "name");
           }
           this.files = [];
-          let folder = FileUtil.combine(FileUtil.resourcesDir(), FileUtil.templates, this.name);
+          const folder = FileUtil.resource(FileUtil.templates, this.name);
           this.files = await FileUtil.saveFiles(req, folder);
      }
 
@@ -25,14 +25,12 @@ export default class Template {
      }
 
      private async getIcon(...folder: string[]): Promise<string | undefined> {
-          let svgFile = FileUtil.combine(...folder, "icon.svg");
+          const svgFile = FileUtil.combine(...folder, "icon.svg");
           try {
-               let buffer = await FileUtil.read(svgFile);
-               let svg = buffer.toString("utf8");
+               const buffer = await FileUtil.read(svgFile);
+               const svg = buffer.toString("utf8");
                return svg;
-          }
-          catch
-          {
+          } catch {
                return undefined;
           }
      }

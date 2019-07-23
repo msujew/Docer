@@ -1,8 +1,8 @@
-import UserSession from "../model/workspace/UserSession";
 import User from "../model/workspace/User";
+import UserSession from "../model/workspace/UserSession";
 
 export async function authenticatedUser(token: string): Promise<User | undefined> {
-    let session = await UserSession.findOne({ token: token }, { relations: [ "user" ] });
+    const session = await UserSession.findOne({ token }, { relations: ["user"] });
     if (session) {
         return session.user;
     } else {

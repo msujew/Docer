@@ -24,8 +24,10 @@
     "morgan": "^1.9.1",
     "sqlite3": "^4.0.8",
     "typeorm": "^0.2.17",
-    "typescript": "^3.2.1",
+    "typescript": "^3.5.3",
     "uuid": "^3.3.2"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "tslint": "^5.18.0"
+  }
 }

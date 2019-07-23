@@ -1,8 +1,8 @@
 import { NextFunction } from "connect";
 import { Request, Response, Router } from "express";
 import Template from "../model/Template";
-import * as FileUtil from "../util/FileUtil";
 import * as ErrorUtil from "../util/ErrorUtil";
+import * as FileUtil from "../util/FileUtil";
 
 class TemplateRoutes {
 
@@ -20,55 +20,64 @@ class TemplateRoutes {
             }
             next();
         });
-        this.router.get("/", (_req: Request, res: Response, next: NextFunction) => {
-            this.getDirectories()
-                .then(templates => res.json(templates))
-                .catch(err => next(err));
-        });
-        this.router.get("/:name", (req: Request, res: Response, next: NextFunction) => {
-            if (req.fields && req.fields.name) {
-                let name = <string>req.fields.name
-                FileUtil.read(FileUtil.resourcesDir(), FileUtil.templates, name, "meta.json")
-                    .then(buffer => {
-                        res.type("application/json")
-                        res.send(buffer);
-                    })
-                    .catch(err => next(err));
-            } else {
-                next(ErrorUtil.MissingFieldError("name"));
+        this.router.get("/", async (_req: Request, res: Response, next: NextFunction) => {
+            try {
+                const templates = await this.getDirectories();
+                return res.json(templates);
+            } catch (err) {
+                return next(err);
             }
         });
-        this.router.post("/", (req: Request, res: Response, next: NextFunction) => {
-            let template = new Template();
-            template.save(req)
-                .then(() => res.end())
-                .catch(err => next(err));
-        });
-        this.router.delete("/:name", (req: Request, res: Response, next: NextFunction) => {
+        this.router.get("/:name", async (req: Request, res: Response, next: NextFunction) => {
             if (req.fields && req.fields.name) {
-                let name = <string>req.fields.name;
-                FileUtil.deleteDir(FileUtil.resourcesDir(), FileUtil.templates, name)
-                    .then(() => res.end())
-                    .catch(err => next(err));
+                try {
+                    const name =  req.fields.name as string;
+                    const buffer = FileUtil.read(FileUtil.resourcesDir(), FileUtil.templates, name, "meta.json");
+                    res.type("application/json");
+                    return res.end(buffer);
+                } catch (err) {
+                    return next(err);
+                }
             } else {
-                next(ErrorUtil.MissingFieldError("name"));
+                return next(ErrorUtil.MissingFieldError(req.fields, "name"));
+            }
+        });
+        this.router.post("/", async (req: Request, res: Response, next: NextFunction) => {
+            const template = new Template();
+            try {
+                await template.save(req);
+                return res.end();
+            } catch (err) {
+                return next(err);
+            }
+        });
+        this.router.delete("/:name", async (req: Request, res: Response, next: NextFunction) => {
+            if (req.fields && req.fields.name) {
+                try {
+                    const name =  req.fields.name as string;
+                    await FileUtil.deleteDir(FileUtil.resourcesDir(), FileUtil.templates, name);
+                    return res.end();
+                } catch (err) {
+                    return next(err);
+                }
+            } else {
+                return next(ErrorUtil.MissingFieldError(req.fields, "name"));
             }
         });
     }
 
     private async getDirectories(): Promise<Template[]> {
-        let stats = FileUtil.readdirStats(FileUtil.resourcesDir(), FileUtil.templates);
-        let templates: Template[] = [];
-        for await (let stat of stats) {
+        const stats = FileUtil.readdirStats(FileUtil.resourcesDir(), FileUtil.templates);
+        const templates: Template[] = [];
+        for await (const stat of stats) {
             if (stat[1].isDirectory()) {
-                let temp = new Template();
+                const temp = new Template();
                 await temp.load(FileUtil.resourcesDir(), FileUtil.templates, stat[0]);
                 templates.push(temp);
             }
         }
         return templates;
     }
-
 
 }
 
