@@ -16,7 +16,7 @@ declare global {
     // tslint:disable-next-line: interface-name
     interface Error {
         status?: number;
-        code?: number;
+        appCode?: number;
     }
 }
 
@@ -62,7 +62,7 @@ class App {
                       _next: NextFunction) => {
             console.log(err);
             res.status(err.status || 500);
-            res.json({ error: { message: err.message, code: err.code } });
+            res.json({ error: { message: err.message, code: err.appCode } });
         });
     }
 }

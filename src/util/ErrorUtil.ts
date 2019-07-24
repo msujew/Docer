@@ -10,19 +10,19 @@ export const WorkspaceNotFoundCode = 6;
 
 export const WorkspaceItemNotFoundError = new Error("Specified workspace item not found");
 WorkspaceItemNotFoundError.status = 500;
-WorkspaceItemNotFoundError.code = WorkspaceItemNotFoundCode;
+WorkspaceItemNotFoundError.appCode = WorkspaceItemNotFoundCode;
 export const WorkspaceNotFoundError = new Error("Specified workspace not found");
 WorkspaceNotFoundError.status = 500;
-WorkspaceNotFoundError.code = WorkspaceItemNotFoundCode;
+WorkspaceNotFoundError.appCode = WorkspaceItemNotFoundCode;
 export const PandocFailedError = new Error("Pandoc finished expectedly");
-PandocFailedError.code = PandocFailureCode;
+PandocFailedError.appCode = PandocFailureCode;
 PandocFailedError.status = 400;
 export const NotLoggedInError = new Error("Not logged in");
 NotLoggedInError.status = 403;
-NotLoggedInError.code = NotLoggedInCode;
+NotLoggedInError.appCode = NotLoggedInCode;
 export const InvalidCredentialsError = new Error("Invalid credentials");
 InvalidCredentialsError.status = 401;
-InvalidCredentialsError.code = InvalidCredentialsCode;
+InvalidCredentialsError.appCode = InvalidCredentialsCode;
 
 export function MissingFieldError(fields: Fields | undefined, ...fieldNames: string[]): ReferenceError {
     const missingFields: string[] = [];
@@ -35,7 +35,7 @@ export function MissingFieldError(fields: Fields | undefined, ...fieldNames: str
     }
 
     const refError = new ReferenceError("Missing request fields: " + missingFields.join());
-    refError.code = MissingFormParameterCode;
+    refError.appCode = MissingFormParameterCode;
     refError.status = 400;
     return refError;
 }
