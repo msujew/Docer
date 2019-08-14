@@ -15,6 +15,9 @@ export default class UserWorkspaceItem extends BaseEntity {
     @Column()
     public path: string = "";
 
+    @Column({ type: "text", nullable: false, default: () => "CURRENT_TIMESTAMP" })
+    public date?: string;
+
     @Column("blob")
     public content?: Buffer;
 
@@ -24,7 +27,7 @@ export default class UserWorkspaceItem extends BaseEntity {
         }
         if (this.path.startsWith(oldFolder)) {
             const fileName = this.path.substring(this.path.lastIndexOf("/") + 1);
-            this.path = FileUtil.combine(newFolder, fileName);
+            this.path = FileUtil.combineNormalized(newFolder, fileName);
         }
         await this.save();
     }

@@ -41,11 +41,11 @@ class WorkspaceRoutes {
                                 workspace = new UserWorkspace(name, user);
                                 await workspace.save();
                             }
-                            if (workspace && workspace.items) {
+                            if (workspace.items) {
                                 for (const item of workspace.items) {
-                                    workspace.files.push(item.path);
+                                    item.content = undefined;
+                                    item.id = undefined;
                                 }
-                                workspace.items = undefined;
                             }
 
                             workspace.user = undefined;
@@ -96,14 +96,15 @@ class WorkspaceRoutes {
                     if (user) {
                         const workspace = await UserWorkspace.findOne({ name: workspaceName, user });
                         let workspaceItem = await UserWorkspaceItem.findOne({ workspace, path });
-                        if (workspaceItem) {
-                            workspaceItem.content = await readFile(req.files.content.path);
-                            await workspaceItem.save();
-                        } else if (workspace) {
+                        if (!workspaceItem && workspace) {
                             workspaceItem = new UserWorkspaceItem();
                             workspaceItem.workspace = workspace;
                             workspaceItem.path = path;
+                        }
+                        if (workspaceItem) {
                             workspaceItem.content = await readFile(req.files.content.path);
+                            let date: Date = new Date();
+                            workspaceItem.date = date.toISOString();
                             await workspaceItem.save();
                         }
                         return res.end();
@@ -114,30 +115,6 @@ class WorkspaceRoutes {
                     return next(err);
                 }
 
-            } else {
-                next(ErrorUtil.MissingFieldError(req.fields, "workspace", "name", "token"));
-            }
-        });
-        this.router.post("/folder", async (req: Request, res: Response, next: NextFunction) => {
-            if (req.fields && req.fields.workspace && req.fields.name && req.fields.token) {
-                try {
-                    const workspaceName =  req.fields.workspace as string;
-                    const path =  req.fields.name as string;
-                    const token =  req.fields.token as string;
-                    const user = await auth.authenticatedUser(token);
-                    if (user) {
-                        const workspace = await UserWorkspace.findOne({ user, name: workspaceName });
-                        if (workspace && workspace.directories) {
-                            workspace.directories.push(path);
-                            await workspace.save();
-                        }
-                        return res.end();
-                    } else {
-                        return next(ErrorUtil.NotLoggedInError);
-                    }
-                } catch (err) {
-                    return next(err);
-                }
             } else {
                 next(ErrorUtil.MissingFieldError(req.fields, "workspace", "name", "token"));
             }
@@ -232,7 +209,7 @@ class WorkspaceRoutes {
                         const workspace = await UserWorkspace.findOne({ user, name: workspaceName }, {
                             relations: ["items"]
                         });
-                        if (workspace && workspace.directories) {
+                        if (workspace) {
                             await workspace.folderRename(path, rename);
                         }
                         return res.end();
@@ -257,7 +234,7 @@ class WorkspaceRoutes {
                         const workspace = await UserWorkspace.findOne({ user, name: workspaceName }, {
                             relations: ["items"]
                         });
-                        if (workspace && workspace.directories) {
+                        if (workspace) {
                             await workspace.deleteFolder(path);
                         }
                         return res.end();

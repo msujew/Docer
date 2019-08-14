@@ -1,10 +1,14 @@
-import { BaseEntity, Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
+import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn, Index } from "typeorm";
 import UserWorkspace from "./UserWorkspace";
 
 @Entity()
 export default class User extends BaseEntity {
 
-    @PrimaryColumn()
+    @PrimaryGeneratedColumn()
+    public id?: number;
+
+    @Column()
+    @Index({ unique: true })
     public name: string = "";
 
     @Column()
