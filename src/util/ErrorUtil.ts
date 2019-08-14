@@ -25,17 +25,40 @@ InvalidCredentialsError.status = 401;
 InvalidCredentialsError.appCode = InvalidCredentialsCode;
 
 export function MissingFieldError(fields: Fields | undefined, ...fieldNames: string[]): ReferenceError {
-    const missingFields: string[] = [];
+    let missingFields: string[] = ["no fields specified"];
     if (fields) {
-        fieldNames
-            .filter((e) => fields[e] === undefined)
-            .forEach((e) => missingFields.push(e));
-    } else {
-        missingFields.push("no fields specified");
+        missingFields = fieldNames.filter((e) => fields[e] === undefined);
     }
 
     const refError = new ReferenceError("Missing request fields: " + missingFields.join());
     refError.appCode = MissingFormParameterCode;
     refError.status = 400;
     return refError;
+}
+
+export function PandocError(output: string): Error {
+    // First off, try to catch the easy ones.
+    const envMatch = firstMatch(/LaTeX Error: Environment ([a-zA-Z0-9]+) undefined/, output);
+    if (envMatch) {
+        return new Error(`Undefined Environment '${envMatch}'`);
+    }
+    const conMatch = firstMatch(/Undefined control sequence\.\s*l\.[0-9]+ \\([a-zA-Z0-9]+)/, output);
+    if (conMatch) {
+        return new Error(`Undefined Command '${conMatch}'`);
+    }
+    const pdfMatch = firstMatch(/Package pdfpages Error: Cannot find file `(?:[a-z]:\/)?(?:[^\/]+\/)+([^\/]+)'/,
+        output);
+    if (pdfMatch) {
+        return new Error(`Missing File '${pdfMatch}'`);
+    }
+
+    return new Error("Unknown Pandoc Error");
+}
+
+function firstMatch(regex: RegExp, text: string): string | undefined {
+    const match = regex.exec(text);
+    if (match !== null) {
+        return match[1];
+    }
+    return undefined;
 }

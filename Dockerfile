@@ -1,9 +1,11 @@
 FROM node:12
 
-# Install texlive
 RUN apt-get update \
     && apt-get install -y \
+    # Install texlive
     texlive-full \
+    # Install librsvg for SVG in PDF support
+    librsvg2-bin \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

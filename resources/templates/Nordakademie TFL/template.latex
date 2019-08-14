@@ -72,6 +72,7 @@ $endif$
 \usepackage[ngerman]{babel}
 \usepackage[babel,german=quotes]{csquotes}
 \usepackage{pdfpages}
+\usepackage{amsmath} % for advanced math mode
 \usepackage{acronym}
 \usepackage{sourcecodepro}
 % These packages are all incorporated in the memoir class to one degree or another...
@@ -260,17 +261,23 @@ $endfor$
 
 \begin{document}
 $if(include-before)$
-\includepdf[pages={1-}]{$resources$/$include-before$}
+\includepdf[pages=-]{$resources$/$include-before$}
 $endif$
+\pagenumbering{roman}
 \tableofcontents 
 $if(lot)$
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{section}{\listtablename}
 \listoftables
 $endif$
 $if(lof)$
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{section}{\listfigurename}
 \listoffigures
 $endif$
-\pagenumbering{roman}
-\newpage
+\cleardoublepage
 $if(disable-arabic-start)$
 $else$
 \pagenumbering{arabic}
@@ -286,7 +293,7 @@ $if(include-after)$
 $endif$
 $for(include-after)$
 
-\includepdf[pages={1-}]{$resources$/$include-after$}
+\includepdf[pages=-]{$resources$/$include-after$}
 
 $endfor$
 

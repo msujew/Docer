@@ -61,7 +61,7 @@ export default class Pandoc {
             pandoc.on("close", async (code) => {
                 if (code !== 0) {
                     console.log("Pandoc Error: " + output);
-                    reject(ErrorUtil.PandocFailedError);
+                    reject(ErrorUtil.PandocError(output));
                 } else {
                     try {
                         const buffer = await FileUtil.read(file);

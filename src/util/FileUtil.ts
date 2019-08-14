@@ -20,6 +20,10 @@ export function combine(...paths: string[]): string {
     return path.join(...paths);
 }
 
+export function combineNormalized(...paths: string[]): string {
+    return combine(...paths).replace("\\", "/");
+}
+
 export function resource(...paths: string[]): string {
     return combine(resourcesDir(), ...paths);
 }
@@ -55,7 +59,8 @@ export async function* readdirRecursive(...folder: string[]): AsyncIterableItera
     const subdirs = await readdir(fullPath);
     for (const subdir of subdirs) {
         const res = path.resolve(fullPath, subdir);
-        if ((await fs.stat(res)).isDirectory()) {
+        const stat = await fs.stat(res);
+        if (stat.isDirectory()) {
             yield* readdirRecursive(res);
         } else {
             yield res;
