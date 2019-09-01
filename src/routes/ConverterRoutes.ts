@@ -28,6 +28,7 @@ class ConverterRoutes {
                     res.type(data.to || "binary");
                     return res.end(buffer, "binary");
                 } else {
+                    res.type("text/plain");
                     return res.end(buffer.toString("utf-8"));
                 }
             } catch (err) {

@@ -1,24 +1,28 @@
 {
 	"disable-arabic-start": {
         "optional": "true",
-        "type": "boolean"
+        "type": "boolean",
+		"issue": "warning"
     },
     "include-before": {
         "optional": "true",
-        "type": "string"
+        "type": "file",
+		"issue": "error"
     },
     "include-after": {
         "optional": "true",
-        "type": "string",
-        "array": "true"
+        "type": "file",
+        "array": "true",
+		"issue": "error"
     },
     "lang": {
         "optional": "true",
-        "type": "string",
-        "regex": "[a-z]{2}-[A-Z]{2}"
+        "type": "locale",
+		"issue": "warning"
     },
     "force-image-position": {
         "optional": "true",
-        "type": "boolean"
+        "type": "boolean",
+		"issue": "warning"
     }
 }

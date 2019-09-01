@@ -28,20 +28,6 @@ class TemplateRoutes {
                 return next(err);
             }
         });
-        this.router.get("/:name", async (req: Request, res: Response, next: NextFunction) => {
-            if (req.fields && req.fields.name) {
-                try {
-                    const name =  req.fields.name as string;
-                    const buffer = FileUtil.read(FileUtil.resourcesDir(), FileUtil.templates, name, "meta.json");
-                    res.type("application/json");
-                    return res.end(buffer);
-                } catch (err) {
-                    return next(err);
-                }
-            } else {
-                return next(ErrorUtil.MissingFieldError(req.fields, "name"));
-            }
-        });
         this.router.post("/", async (req: Request, res: Response, next: NextFunction) => {
             const template = new Template();
             try {
