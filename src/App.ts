@@ -1,8 +1,8 @@
+import { NextFunction } from "connect";
 import * as express from "express";
 import * as formidable from "express-formidable";
 import * as morgan from "morgan";
-
-import { NextFunction } from "connect";
+import { PandocError } from "./process/PandocError";
 import ConverterRoutes from "./routes/ConverterRoutes";
 import CslRoutes from "./routes/CslRoutes";
 import LoginRoutes from "./routes/LoginRoutes";
@@ -62,7 +62,12 @@ class App {
                       _next: NextFunction) => {
             console.log(err);
             res.status(err.status || 500);
-            res.json({ error: { message: err.message, code: err.appCode } });
+            if (err.name === "PandocError") {
+                const pandocErr = err as PandocError;
+                res.json({ error: { message: err.message, pandoc: pandocErr.pandoc, code: err.appCode } });
+            } else {
+                res.json({ error: { message: err.message, code: err.appCode } });
+            }
         });
     }
 }

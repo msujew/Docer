@@ -2,6 +2,7 @@ import { spawn } from "child_process";
 import ConverterData from "../model/ConverterData";
 import * as ErrorUtil from "../util/ErrorUtil";
 import * as FileUtil from "../util/FileUtil";
+import { PandocError } from "./PandocError";
 
 export default class Pandoc {
 
@@ -62,7 +63,9 @@ export default class Pandoc {
             pandoc.on("close", async (code) => {
                 if (code !== 0) {
                     console.log("Pandoc Error: " + output);
-                    reject(ErrorUtil.PandocError(output));
+                    const escapedFolder = this.escape(folder);
+                    output = output.replace(new RegExp(escapedFolder, "g"), "");
+                    reject(new PandocError(output));
                 } else {
                     try {
                         const buffer = await FileUtil.read(file);
@@ -74,6 +77,10 @@ export default class Pandoc {
                 }
             });
         });
+    }
+
+    private escape(s: string): string {
+        return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
     }
 
     private setTemplate(data: ConverterData, args: string[]) {
