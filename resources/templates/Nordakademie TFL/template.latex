@@ -74,6 +74,7 @@ $endif$
 \usepackage{pdfpages}
 \usepackage{amsmath} % for advanced math mode
 \usepackage{acronym}
+\usepackage{pgfplots}
 \usepackage{sourcecodepro}
 % These packages are all incorporated in the memoir class to one degree or another...
 
@@ -240,6 +241,8 @@ $endif$
 \usepackage{sectsty}
 \allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
 % (This matches ConTeXt defaults)
+\setcounter{tocdepth}{5}
+\setcounter{secnumdepth}{5}
 
 %%% ToC (table of contents) APPEARANCE
 \usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
