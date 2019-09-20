@@ -21,7 +21,6 @@ async function run() {
                 UserWorkspaceItem
             ],
             logging: false,
-            synchronize: true,
             type: "sqlite"
         });
         console.log("Connected to Database");

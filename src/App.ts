@@ -7,6 +7,7 @@ import ConverterRoutes from "./routes/ConverterRoutes";
 import CslRoutes from "./routes/CslRoutes";
 import LoginRoutes from "./routes/LoginRoutes";
 import RegisterRoutes from "./routes/RegisterRoutes";
+import SchemaRoutes from "./routes/SchemaRoutes";
 import SyntaxDefinitionRoutes from "./routes/SyntaxDefinitionRoutes";
 import TemplateRoutes from "./routes/TemplateRoutes";
 import WorkspaceRoutes from "./routes/WorkspaceRoutes";
@@ -41,6 +42,7 @@ class App {
             uploadDir: FileUtil.resource(FileUtil.uploads)
         }));
         this.app.use("/login",  LoginRoutes);
+        this.app.use("/schema", SchemaRoutes);
         this.app.use("/convert", ConverterRoutes);
         this.app.use("/templates", TemplateRoutes);
         this.app.use("/syntax-definitions", SyntaxDefinitionRoutes);

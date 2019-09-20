@@ -1,0 +1,19 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Docdown",
+    "type": "object",
+    "properties": {
+        "template": {
+            "type": "string",
+            "enum": [""]
+        },
+        "csl": {
+            "type": "string",
+            "enum": [""]
+        }
+    },
+    "required": [
+        "template",
+        "csl"
+    ]
+}
