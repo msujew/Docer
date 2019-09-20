@@ -37,6 +37,7 @@ export default class Pandoc {
             this.setTemplate(data, args);
             this.setCsl(data, args);
             await this.setBibliography(folder, args);
+            await this.setPreamble(folder, args);
 
             if (data.isPlainText()) {
                 args.push("--wrap=none");
@@ -94,6 +95,14 @@ export default class Pandoc {
     private async setBibliography(directory: string, args: string[]) {
         for await (const file of FileUtil.readdirRecursiveFiltered(".bib", directory)) {
             args.push("--bibliography", file);
+        }
+    }
+
+    private async setPreamble(directory: string, args: string[]) {
+        for await (let file of FileUtil.readdirRecursiveFiltered("preamble.tex", directory)) {
+            file = file.substring(0, file.length - 4);
+            args.push("-V");
+            args.push(`preamble=${file.split("\\").join("/")}`);
         }
     }
 

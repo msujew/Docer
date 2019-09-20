@@ -258,6 +258,13 @@ style=ieee
 $for(bibliography)$
 \addbibresource{$bibliography$}
 $endfor$
+
+% Added preamble
+
+$if(preamble)$
+\input{$preamble$}
+$endif$
+
 %%% END Article customizations
 
 %%% The "real" document content comes below...
